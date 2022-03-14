@@ -1,17 +1,16 @@
-from random import randint
+highBorder = 1000
+lowBorder = 0
 
-guess = randint(0,1000)
-
-print(f"PC guess is {guess}")
 res = input(f"Is your number correct [<,>,=]: ")
 
 while res != "=":
+  guess = (lowBorder + highBorder) // 2
   res = input(f"Is your number correct [<,>,=]: ")
   if(res == "<"):
-    newGuess = randint(0, guess)
+    highBorder = guess
   elif(res == ">"):
-    newGuess = randint(guess, guess * 2)
-  guess = newGuess
-  print(f"New PC guess is {newGuess}")
+    lowBorder = guess
+
+  print(f"New PC guess is {guess}")
 
 print("PC GUESSED CORRECTLY!!!")
