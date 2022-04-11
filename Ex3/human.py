@@ -5,12 +5,11 @@ class Human(Player):
         self.name = name
 
     def action(self, state):
-        print("Your cards are: ", str(state["hand"]))
+        print("Your cards are: ")
+        for i  in range (len(state["hand"])):
+            print(state["hand"][i])
         idx = int(input("Pick card: [0-2] "))
         while(idx > len(state["hand"]) or idx < 0):
             idx = int(input("Pick card: [0-2] "))
         
-        for key, value in state.items():
-            if(key == "hand"):
-                card = value.pop(idx)
-                return card
+        return idx

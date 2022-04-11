@@ -20,10 +20,11 @@ class Briskula:
         "11": 2
     }
 
-    def __init__(self, p1, p2, state):
+    def __init__(self, p1, p2, deck, state):
         self.p1 = p1
         self.p2 = p2
         self.state = state
+        self.state["table"] = deck
 
 
     def __str__(self):
@@ -102,34 +103,25 @@ class Briskula:
 
     def statefn(self):
         hand_len = len(self.state["hand"])
-        while(hand_len < 3):
-            card = self.state["table"].peskaj()
-            self.state["hand"].append(card)
-            hand_len += 1
-
-        self.state["winned_card"] = []
-        self.state["opponent_winned"] = []
-        self.state["zog"] = self.state["table"].peskaj()
-        self.state.update({"table": self.state["table"]})
-        
+        if(len(self.state["table"].cards) > 0):
+            while(hand_len < 3):
+                card = self.state["table"].peskaj()
+                self.state["hand"].append(card)
+                hand_len += 1
+                
         return self.state
 
 
     def play_game(self):
-        deck = cards.Deck()
-        self.state["table"] = deck
         self.state["hand"] = []
-        self.state = self.statefn()
-
+        self.state["winned_card"] = []
+        self.state["opponent_winned"] = []
+        self.state["zog"] = self.state["table"].peskaj()
+        self.state.update({"table": self.state["table"]})
         self.state["table"].add(self.state["zog"])
 
         while(len(self.state["table"].cards)):
-            try:
-                while(len(self.state["hand"]) < 3):
-                    card = self.state["table"].peskaj()
-                    self.state["hand"].append(card)
-            except:
-                print("GOTOVO")
+            self.state = self.statefn()
             h_card, c_karta = self.play_hand()
             peska = []
             peska.append(h_card)
@@ -164,26 +156,25 @@ class Briskula:
 
 
     def play_hand(self):
-        h_card = self.p1.action(self.state)
-        c_karta = self.p2.action(self.state)
-        return h_card, c_karta
+        h_idx = self.p1.action(self.state)
+        h_card = self.state["hand"].pop(h_idx)
+        c_idx = self.p2.action(self.state)
+        self.state = self.statefn()
 
 
-class Current:
-    def __init__(self, hand, winned_card, opponent_winned):
-        self.hand = hand
-        self.winned_card = winned_card
-        self.opponent_winned = opponent_winned
+        c_card = self.state["hand"].pop(c_idx)
 
-    
+        return h_card, c_card
 
-p1 = human.Human("p1")
-p2 = player.Player("p2")
+if __name__ == "__main__":
+    p1 = human.Human("p1")
+    p2 = player.Player("p2")
 
-briskula = Briskula(p1, p2, {})
-num_games = 5
+    num_games = 5
 
-while(num_games > 0):
-    briskula.play_game()
-    num_games -= 1
-    print(num_games)
+    while(num_games > 0):
+        deck = cards.Deck()
+        briskula = Briskula(p1, p2, deck, {})
+        briskula.play_game()
+        num_games -= 1
+        print(num_games)

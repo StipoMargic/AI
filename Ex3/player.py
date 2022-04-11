@@ -6,12 +6,7 @@ class Player:
         self.name = name
 
     def action(self, state):
-        idx = randint(0, len(state["hand"] ) - 1)
-        for key, value in state.items():
-            if(key == "hand"):
-                card = value[idx]
-                value.pop(idx)
-                return card
+        return randint(0, len(state["hand"] ) - 1)
         
 
     
