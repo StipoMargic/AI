@@ -33,8 +33,3 @@ class Deck(Cards):
 
     def peskaj(self):
         return self.pullout(0)    
-
-    
-deck = Deck()
-
-    

@@ -1,180 +1,172 @@
 import cards
-import human
-import player
-
+from human import Human
+from player import Player
 
 class Briskula:
-    power = {
-        "1": 1,
-        "3": 2,
-        "13": 3,
-        "12": 4,
-        "11": 5
-    }
-
-    scores = {
-        "1": 11,
-        "3": 10,
-        "13": 4,
-        "12": 3,
-        "11": 2
-    }
-
-    def __init__(self, p1, p2, deck, state):
-        self.p1 = p1
-        self.p2 = p2
-        self.state = state
-        self.state["table"] = deck
-
-
-    def __str__(self):
-        return "Cards: " + self.state["table"].cards,\
-            "\nZog: " + str(self.state["zog"]), \
-            "\Table: " + str(self.state["table"]), \
-            "\nCards " + self.p1.name + ": " + str(self.state["hand"])
-
+    scores = {1: 11, 2: 0, 3: 10, 4: 0, 5: 0, 6: 0, 7: 0, 11: 2, 12: 3, 13: 4}
+    power = {1: 13, 2: 4, 3: 12, 4: 5, 5: 6, 6: 7, 7: 8, 11: 9, 12: 10, 13: 11}
     
-    def check_card(self, card):
-        if(str(card.num) in self.scores):
-            return self.scores[str(card.num)]
-        
-        return 0
+    turn = 1
 
-    def check_card_strength(self, h_card, c_karta, zog):
-        if(h_card.zog == zog.zog and c_karta.zog == zog.zog):
-            if((str(h_card.num) not in self.power) and (str(c_karta.num) not in self.power)):
-                if(h_card.num > c_karta.num):
+    def __init__(self, player1, player2):
+        self.p1 = player1
+        self.p2 = player2
+        self.deck = cards.Deck()
+        self.briskula = self.deck.peskaj()
+        self.deck.cards.append(self.briskula)
+        self.cards_on_table = []
+        for i in range(6):
+            if i < 3:
+                self.p1.hand.append(self.deck.peskaj())
+            else:
+                self.p2.hand.append(self.deck.peskaj())
+        print("Briskula is:" + str(self.briskula))
+
+    def check_card_strength(self, h_card, c_card, zog):
+        if(h_card.zog == zog and c_card.zog == zog):
+            if((str(h_card.num) not in self.power) and (str(c_card.num) not in self.power)):
+                if(h_card.num > c_card.num):
                     return True
                 else:
                     return False  
-            elif((str(h_card.num) in self.power) and (str(c_karta.num) not in self.power)):
+            elif((str(h_card.num) in self.power) and (str(c_card.num) not in self.power)):
                 return True
             else:
                 return True
-        elif(h_card.zog != zog.zog and c_karta.zog == zog.zog):
+        elif(h_card.zog != zog and c_card.zog == zog):
             return False
-        elif(h_card.zog == zog.zog and c_karta.zog != zog.zog):
+        elif(h_card.zog == zog and c_card.zog != zog):
             return True
-        elif(h_card.zog != zog.zog and c_karta.zog != zog.zog):
-            if(h_card.zog == c_karta.zog):
-                if(str(h_card.num) in self.power and str(c_karta.num) not in self.power):
+        elif(h_card.zog != zog and c_card.zog != zog):
+            if(h_card.zog == c_card.zog):
+                if(str(h_card.num) in self.power and str(c_card.num) not in self.power):
                     return True
-                elif(str(h_card.num) not in self.power and str(c_karta.num) not in self.power):
-                    return h_card.num > c_karta.num
-                elif(str(h_card.num) not in self.power and str(c_karta.num) in self.power):
+                elif(str(h_card.num) not in self.power and str(c_card.num) not in self.power):
+                    return h_card.num > c_card.num
+                elif(str(h_card.num) not in self.power and str(c_card.num) in self.power):
                     return False
-                if(self.power[str(h_card.num)] > self.power[str(c_karta.num)]):
+                if(self.power[str(h_card.num)] > self.power[str(c_card.num)]):
                     return True
                 else:
                     return False
             else:
-                if(str(h_card.num) in self.power and str(c_karta.num) not in self.power):
+                if(str(h_card.num) in self.power and str(c_card.num) not in self.power):
                     return True
-                elif(str(h_card.num) not in self.power and str(c_karta.num) in self.power):
+                elif(str(h_card.num) not in self.power and str(c_card.num) in self.power):
                     return False
                 else:
-                    return h_card.num > c_karta.num
+                    return h_card.num > c_card.num
     
 
     def rez(self):
         c_score = 0
         h_score = 0
 
-        for key, value in self.state.items():
-            if(key == "winned_card"):
-                for el in value:
-                    h_score += self.check_card(el)
-                if(h_score > 60):
-                    print(self.p1.name, " have ", h_score, " score")
-                    print(self.p2.name, " have ", c_score, " score")
-                    return 1
-            if(key == "opponent_winned"):
-                for el in value:
-                    c_score +=  self.check_card(el)
-                if(c_score > 60):
-                    print(self.p2.name, " have ", c_score, " score")
-                    print(self.p1.name, " have ", h_score, " score")
-                    return 2 
+        for card in self.p1.winned:
+            h_score += self.scores[card.num]
 
-        print(self.p1.name, " have ", h_score)
-        print(self.p2.name, " have ", c_score)
-        return 0
+        for card in self.p2.winned:
+            c_score += self.scores[card.num]
+
+        if h_score > c_score:
+            return 1
+        elif h_score < c_score:
+            return 2
+        else:
+            return 0
 
 
     def statefn(self):
-        hand_len = len(self.state["hand"])
-        if(len(self.state["table"].cards) > 0):
-            while(hand_len < 3):
-                card = self.state["table"].peskaj()
-                self.state["hand"].append(card)
-                hand_len += 1
-                
-        return self.state
-
+        if self.turn == 1:
+            return {"briskula": self.briskula, "hand": self.p1.hand, "table": self.cards_on_table, "winned_cards": self.p1.winned, "opponent_winned": self.p2.winned}
+            
+        return {"briskula": self.briskula, "hand": self.p2.hand, "table": self.cards_on_table, "winned_cards": self.p2.winned, "opponent_winned": self.p1.winned}
 
     def play_game(self):
-        self.state["hand"] = []
-        self.state["winned_card"] = []
-        self.state["opponent_winned"] = []
-        self.state["zog"] = self.state["table"].peskaj()
-        self.state.update({"table": self.state["table"]})
-        self.state["table"].add(self.state["zog"])
-
-        while(len(self.state["table"].cards)):
-            self.state = self.statefn()
-            h_card, c_karta = self.play_hand()
-            peska = []
-            peska.append(h_card)
-            peska.append(c_karta)
-            if(self.check_card_strength(h_card, c_karta, self.state["zog"])):
-                self.state["winned_card"].extend(peska)
-            else:
-                self.state["opponent_winned"].extend(peska)
-
-
-        if(len(self.state["hand"]) > 0):
-            h_card, c_karta = self.play_hand()
-            if(self.check_card_strength(h_card, c_karta, self.state["zog"])):
-                peska = []
-                peska.append(h_card)
-                peska.append(c_karta)
-                self.state["winned_card"].extend(peska)
-            else:
-                peska = []
-                peska.append(h_card)
-                peska.append(c_karta)
-                self.state["opponent_winned"].extend(peska)
-
-        p1 = self.rez()
-
-        if(p1 == 1):
-            print(self.p1.name, "WON")
-        elif(p1 == 2):
-            print(self.p2.name, "WON")
-        elif(p1 == 0):
-            print("TIED")
-
+        while True:
+            len_p1_hand = len(self.p1.hand)
+            len_p2_hand = len(self.p2.hand)
+            len_deck = len(self.deck.cards)
+            if len_deck >= 2 and len_p1_hand > 0 and len_p2_hand > 0:
+                self.play_hand()
+                if self.turn == 1:
+                    self.p1.hand.append(self.deck.peskaj())
+                    self.p2.hand.append(self.deck.peskaj())
+                elif self.turn == 2:
+                    self.p2.hand.append(self.deck.peskaj())
+                    self.p1.hand.append(self.deck.peskaj())
+            elif len_deck == 0 and len_p1_hand > 0 and len_p2_hand > 0:
+                self.play_hand()
+            else: 
+                break
 
     def play_hand(self):
-        h_idx = self.p1.action(self.state)
-        h_card = self.state["hand"].pop(h_idx)
-        c_idx = self.p2.action(self.state)
-        self.state = self.statefn()
+        if self.turn == 1:
+            h_idx = self.p1.action(self.statefn())
+            h_card = self.p1.hand[h_idx]
+            self.cards_on_table.append(h_card)
+            self.p1.hand.pop(h_idx)
 
+            c_idx = self.p2.action(self.statefn())
+            c_card = self.p2.hand[c_idx]
+            self.cards_on_table.append(c_card)
+            self.p2.hand.pop(c_idx)
 
-        c_card = self.state["hand"].pop(c_idx)
+            winned = self.check_card_strength(h_card, c_card, self.briskula.zog)
+            if winned:
+                self.p1.winned.append(self.cards_on_table[0])
+                self.p1.winned.append(self.cards_on_table[1])
+                self.turn = 1
+            else: 
+                self.p2.winned.append(self.cards_on_table[0])
+                self.p2.winned.append(self.cards_on_table[1])
+                self.turn = 2
 
-        return h_card, c_card
+            self.cards_on_table.clear()
+        else:
+            h_idx = self.p2.action(self.statefn())
+            h_card = self.p2.hand[h_idx]
+            self.cards_on_table.append(h_card)
+            self.p2.hand.pop(h_idx)
+
+            c_idx = self.p1.action(self.statefn())
+            c_card = self.p1.hand[c_idx]
+            self.cards_on_table.append(c_card)
+            self.p1.hand.pop(h_idx)
+
+            winned = self.check_card_strength(h_card, c_card, self.briskula.zog)
+            if winned:
+                self.p2.winned.append(self.cards_on_table[0])
+                self.p2.winned.append(self.cards_on_table[1])
+                self.turn = 2
+            else: 
+                self.p1.winned.append(self.cards_on_table[0])
+                self.p1.winned.append(self.cards_on_table[1])
+                self.turn = 1
+
+            self.cards_on_table.clear()
+
+class BriskulaPlayer(Player):
+    def __init__(self, name):
+        super().__init__(name)
+        self.hand = []
+        self.winned = []
 
 if __name__ == "__main__":
-    p1 = human.Human("p1")
-    p2 = player.Player("p2")
+    p1 = Human("p1")
+    p2 = BriskulaPlayer("p2")
 
     num_games = 5
 
     while(num_games > 0):
-        deck = cards.Deck()
-        briskula = Briskula(p1, p2, deck, {})
-        briskula.play_game()
-        num_games -= 1
-        print(num_games)
+        briskula1 = Briskula(p1, p2)
+        briskula1.play_game()
+        rez = briskula1.rez()
+        if rez == 1:
+            print("Win" + p1.name)
+        elif rez == 2:
+            print("Win" + p2.name)
+        else:
+            print("Tie")
+        num_games -= 1  
+        print(rez)

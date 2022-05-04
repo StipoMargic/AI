@@ -6,7 +6,6 @@ class Player:
         self.name = name
 
     def action(self, state):
-        return randint(0, len(state["hand"] ) - 1)
-        
-
-    
+        if (len(state["hand"]) >= 1):
+             return randint(0, len(state["hand"] ) - 1)
+        return 0
