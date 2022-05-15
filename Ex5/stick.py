@@ -12,7 +12,7 @@ class Stick:
         if(self.player == "1"):
             self.player = "2"
         else:
-            self.player = "2"
+            self.player = "1"
 
 
     def action(self, number):
@@ -26,7 +26,12 @@ class Stick:
 
 
     def is_terminal(self):
-        return  self.floor <= 2
+        if self.floor < 2:
+            return True
+        elif self.floor == 2:
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     stick = Stick()
